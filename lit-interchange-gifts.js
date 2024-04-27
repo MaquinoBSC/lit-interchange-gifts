@@ -5,6 +5,8 @@ import '@material/mwc-textfield/mwc-textfield';
 import { v4 } from 'uuid';
 
 import './src/participant-item/participant-item.js';
+import './src/raffle-item/raffle-item.js';
+
 
 class LitInterchangeGifts extends LitElement {
     static get properties() {
@@ -43,13 +45,12 @@ class LitInterchangeGifts extends LitElement {
         const size = this.participantList.length;
         this.raffleList = this.participantList.map((participant, idx) => {
             if(idx === size - 1) return { from: participant.name, to: this.participantList[0].name }
-            else return { form: participant.name, to: this.participantList[idx + 1].name }
+            else return { from: participant.name, to: this.participantList[idx + 1].name }
         });
     }
 
     _updatingParticipant(id, { detail }) {
         this.participantList = this.participantList.map((participant) => participant.id === id ? detail.updatedParticipant : participant )
-        console.log(this.participantList);
     }
 
     _deletingParticipant(id) {
@@ -72,13 +73,20 @@ class LitInterchangeGifts extends LitElement {
                                     <participant-item 
                                         .participant=${participant} 
                                         @fire-updated-participant=${ e => this._updatingParticipant(participant.id, e) }
-                                        @fire-deleted-participant=${ e => this._deletingParticipant(participant.id) }
+                                        @fire-deleted-participant=${ () => this._deletingParticipant(participant.id) }
                                     ></participant-item>
                                 `) : html`<p>No hay participantes aun</p>`
                         }
                     </mwc-list>
                     ${
                         this._raffleStatus ? html`<mwc-button @click=${ () => this._fireRaffle() }>Raffle</mwc-button>` : ''
+                    }
+                </div>
+                <div>
+                    ${
+                        this.raffleList.length > 0 ? this.raffleList.map((raffle) => html`
+                            <raffle-item .raffle=${ raffle }></raffle-item>
+                        `) : html`<p>Para realizar el sorteo necesitas al menos 3 participantes y que cada uno tenga al menos un elemento en su lista de deseos</p>`
                     }
                 </div>
             </div>
