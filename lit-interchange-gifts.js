@@ -12,7 +12,6 @@ class LitInterchangeGifts extends LitElement {
     static get properties() {
         return {
             participantList: { type: Array },
-            wishList: { type: Array },
             currentWishList: { type: Array },
         }
     }
@@ -20,7 +19,6 @@ class LitInterchangeGifts extends LitElement {
     constructor() {
         super();
         this.participantList = [];
-        this.wishList = [];
         this.currentWishList = '';
     }
 
@@ -41,9 +39,16 @@ class LitInterchangeGifts extends LitElement {
         this.participantList = this.participantList.filter(participant => participant.id !== id);
     }
 
-    _addToWishList({ detail }) {
-        this.wishList = [ ...this.wishList, detail.wish ];
-        this.currentWishList = '';
+    _addToWishList(id, { detail }) {
+        if(detail.wish !== '') {
+            this.participantList = this.participantList.map((participant) => participant.id === id ? { ...participant, wishList: [ ...participant.wishList, detail.wish ]} : participant)
+            this.currentWishList = '';
+            this.requestUpdate();
+        }
+    }
+
+    get _raffleStatus() {
+        return (!this.participantList.some((participant) => participant.wishList.length === 0) && this.participantList.length > 0);
     }
 
     render() {
@@ -57,18 +62,21 @@ class LitInterchangeGifts extends LitElement {
                 <div>
                     <mwc-list>
                         ${
-                            this.participantList.length > 0 ? this.participantList.map(({ name, id }) => html`
+                            this.participantList.length > 0 ? this.participantList.map(({ name, id, wishList }) => html`
                                 <mwc-list-item>${ name }</mwc-list-item>
                                 <mwc-button outlined @click=${ () => this.currentWishList = id }>WishList</mwc-button>
                                 <mwc-button outlined @click=${ () => this._deleteParticipant(id) }>Delete</mwc-button>
-                                <p>Wish List: <span>${ this.wishList.join(',') }</span></p>
+                                <p>Wish List: <span>${ wishList.join(',') }</span></p>
                                 
                                 ${ this.currentWishList === id ? html`
-                                    <wish-list @fire_new_wish=${ (e) => this._addToWishList(e) }></wish-list>
+                                    <wish-list @fire_new_wish=${ (e) => this._addToWishList(id, e) }></wish-list>
                                 ` : '' }
                             `) : html`<p>No hay participantes aun</p>`
                         }
                     </mwc-list>
+                    ${
+                        this._raffleStatus ? html`<mwc-button>Raffle</mwc-button>` : ''
+                    }
                 </div>
             </div>
         `;
