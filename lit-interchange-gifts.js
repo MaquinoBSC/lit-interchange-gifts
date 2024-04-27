@@ -1,18 +1,17 @@
 import { LitElement, html } from "lit";
 import '@material/mwc-button/mwc-button';
 import '@material/mwc-list/mwc-list';
-import '@material/mwc-list/mwc-list-item';
 import '@material/mwc-textfield/mwc-textfield';
 import { v4 } from 'uuid';
 
-import './wish-list.js'
-
+import './src/participant-item/participant-item.js';
 
 class LitInterchangeGifts extends LitElement {
     static get properties() {
         return {
             participantList: { type: Array },
             currentWishList: { type: Array },
+            raffleList: { type: Array }
         }
     }
 
@@ -20,6 +19,7 @@ class LitInterchangeGifts extends LitElement {
         super();
         this.participantList = [];
         this.currentWishList = '';
+        this.raffleList = [];
     }
 
     get _participantInput() {
@@ -35,26 +35,31 @@ class LitInterchangeGifts extends LitElement {
         }
     }
 
-    _deleteParticipant(id) {
-        this.participantList = this.participantList.filter(participant => participant.id !== id);
-    }
-
-    _addToWishList(id, { detail }) {
-        if(detail.wish !== '') {
-            this.participantList = this.participantList.map((participant) => participant.id === id ? { ...participant, wishList: [ ...participant.wishList, detail.wish ]} : participant)
-            this.currentWishList = '';
-            this.requestUpdate();
-        }
-    }
-
     get _raffleStatus() {
-        return (!this.participantList.some((participant) => participant.wishList.length === 0) && this.participantList.length > 0);
+        return (!this.participantList.some((participant) => participant.wishList.length === 0) && this.participantList.length >= 3);
+    }
+
+    _fireRaffle() {
+        const size = this.participantList.length;
+        this.raffleList = this.participantList.map((participant, idx) => {
+            if(idx === size - 1) return { from: participant.name, to: this.participantList[0].name }
+            else return { form: participant.name, to: this.participantList[idx + 1].name }
+        });
+    }
+
+    _updatingParticipant(id, { detail }) {
+        this.participantList = this.participantList.map((participant) => participant.id === id ? detail.updatedParticipant : participant )
+        console.log(this.participantList);
+    }
+
+    _deletingParticipant(id) {
+        this.participantList = this.participantList.filter((participant) => participant.id !== id );
     }
 
     render() {
         return html`
             <div>
-                <h1>Intercambio de regalos</h1>
+                <h1>Interchange of Gifts</h1>
                 <div>
                     <mwc-textfield label="Participant name" id="participant-input"></mwc-textfield>
                     <mwc-button raised @click=${ () => this._addParticipant() }>Add participant</mwc-button>
@@ -62,20 +67,18 @@ class LitInterchangeGifts extends LitElement {
                 <div>
                     <mwc-list>
                         ${
-                            this.participantList.length > 0 ? this.participantList.map(({ name, id, wishList }) => html`
-                                <mwc-list-item>${ name }</mwc-list-item>
-                                <mwc-button outlined @click=${ () => this.currentWishList = id }>WishList</mwc-button>
-                                <mwc-button outlined @click=${ () => this._deleteParticipant(id) }>Delete</mwc-button>
-                                <p>Wish List: <span>${ wishList.join(',') }</span></p>
-                                
-                                ${ this.currentWishList === id ? html`
-                                    <wish-list @fire_new_wish=${ (e) => this._addToWishList(id, e) }></wish-list>
-                                ` : '' }
-                            `) : html`<p>No hay participantes aun</p>`
+                            this.participantList.length > 0 ? this.participantList.map((participant) => 
+                                html`
+                                    <participant-item 
+                                        .participant=${participant} 
+                                        @fire-updated-participant=${ e => this._updatingParticipant(participant.id, e) }
+                                        @fire-deleted-participant=${ e => this._deletingParticipant(participant.id) }
+                                    ></participant-item>
+                                `) : html`<p>No hay participantes aun</p>`
                         }
                     </mwc-list>
                     ${
-                        this._raffleStatus ? html`<mwc-button>Raffle</mwc-button>` : ''
+                        this._raffleStatus ? html`<mwc-button @click=${ () => this._fireRaffle() }>Raffle</mwc-button>` : ''
                     }
                 </div>
             </div>
