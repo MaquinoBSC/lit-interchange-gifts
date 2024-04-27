@@ -1,11 +1,15 @@
 import { LitElement, html } from "lit";
 
+import { raffleStyles } from './raffle-item-styles.js';
+
 class RaffleItem extends LitElement {
     static get properties() {
         return {
             raffle: { type: Object }
         }
     }
+
+    static styles = raffleStyles;
 
     constructor() {
         super();

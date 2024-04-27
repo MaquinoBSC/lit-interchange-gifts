@@ -1,6 +1,7 @@
 import { LitElement, html } from "lit";
 import '@material/mwc-button/mwc-button';
-import '@material/mwc-list/mwc-list-item';
+
+import { participantStyles } from './participant-item-styles.js';
 
 
 class ParticipantItem extends LitElement {
@@ -10,6 +11,8 @@ class ParticipantItem extends LitElement {
             isWishForm: { type: Boolean }
         }
     }
+
+    static styles = participantStyles;
 
     constructor() {
         super();
@@ -32,7 +35,7 @@ class ParticipantItem extends LitElement {
         }
     }
 
-    _deleteParticipant(id) {
+    _deleteParticipant() {
         this._dispatcherEvent('fire-deleted-participant', { });
     }
 
@@ -46,15 +49,33 @@ class ParticipantItem extends LitElement {
 
     render() {
         return html`
-            <div>
-                <mwc-list-item>${ this.participant.name }</mwc-list-item>
-                <mwc-button outlined @click=${ () => this.isWishForm = true }>WishList</mwc-button>
-                <mwc-button outlined @click=${ () => this._deleteParticipant(this.participant.id) }>Delete</mwc-button>
-                <p>Wish List: <span>${ this.participant.wishList.join(', ') }</span></p>
+            <div class="participant-container">
+                <div class="view-participant">
+                    <p>
+                        <span>Name: </span>
+                        ${ this.participant.name }
+                    </p>
+                    <p>
+                        <span>Wish List:</span>
+                        ${ this.participant.wishList.join(', ') }
+                    </p>
+                </div>
+                <div class="view-participant mwc-container">
+                    <mwc-button 
+                        outlined @click=${ () => this.isWishForm = true }
+                    >wishlist: </mwc-button>
+                    <mwc-button 
+                        outlined 
+                        @click=${ () => this._deleteParticipant() }
+                    >delete</mwc-button>
+                </div>
+                
                 
                 ${ this.isWishForm ? html`
-                    <mwc-textfield lable="Wish name" id="wish-input"></mwc-textfield>
-                    <mwc-button @click=${ () => this._addWish() }>Add wish</mwc-button>
+                    <div class="view-participant mwc-container">
+                        <mwc-textfield label="Wish name" id="wish-input"></mwc-textfield>
+                        <mwc-button raised @click=${ () => this._addWish() }>add</mwc-button>
+                    </div>
                 ` : '' }
             </div>
         `;

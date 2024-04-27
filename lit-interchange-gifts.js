@@ -6,6 +6,7 @@ import { v4 } from 'uuid';
 
 import './src/participant-item/participant-item.js';
 import './src/raffle-item/raffle-item.js';
+import { interchangeGiftsStyles } from './lit-interchange-gifts-styles.js';
 
 
 class LitInterchangeGifts extends LitElement {
@@ -16,6 +17,8 @@ class LitInterchangeGifts extends LitElement {
             raffleList: { type: Array }
         }
     }
+
+    static styles = interchangeGiftsStyles;
 
     constructor() {
         super();
@@ -59,13 +62,13 @@ class LitInterchangeGifts extends LitElement {
 
     render() {
         return html`
-            <div>
+            <div class="main-container">
                 <h1>Interchange of Gifts</h1>
-                <div>
+                <div class="form-add-participant">
                     <mwc-textfield label="Participant name" id="participant-input"></mwc-textfield>
                     <mwc-button raised @click=${ () => this._addParticipant() }>Add participant</mwc-button>
                 </div>
-                <div>
+                <div class="participants-container">
                     <mwc-list>
                         ${
                             this.participantList.length > 0 ? this.participantList.map((participant) => 
@@ -78,15 +81,17 @@ class LitInterchangeGifts extends LitElement {
                                 `) : html`<p>No hay participantes aun</p>`
                         }
                     </mwc-list>
-                    ${
-                        this._raffleStatus ? html`<mwc-button @click=${ () => this._fireRaffle() }>Raffle</mwc-button>` : ''
-                    }
                 </div>
                 <div>
                     ${
-                        this.raffleList.length > 0 ? this.raffleList.map((raffle) => html`
-                            <raffle-item .raffle=${ raffle }></raffle-item>
-                        `) : html`<p>Para realizar el sorteo necesitas al menos 3 participantes y que cada uno tenga al menos un elemento en su lista de deseos</p>`
+                        this._raffleStatus ? html`
+                            <mwc-button raised @click=${ () => this._fireRaffle() }>Raffle</mwc-button>
+                            ${
+                                this.raffleList.length > 0 ? this.raffleList.map((raffle) => html`
+                                    <raffle-item .raffle=${ raffle }></raffle-item>
+                                `) : html`<p>Para realizar el sorteo necesitas al menos 3 participantes y que cada uno tenga al menos un elemento en su lista de deseos</p>`
+                            }
+                        ` : ''
                     }
                 </div>
             </div>
