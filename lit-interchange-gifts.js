@@ -32,8 +32,13 @@ class LitInterchangeGifts extends LitElement {
     }
 
     _addParticipant() {
-        const participant = this._participantInput.value;
+        const participant = this._participantInput.value.toUpperCase();
         if(participant !== ''){
+            if(this.participantList.some((p) => p.name === participant)) {
+                alert('Ya existe un participante con ese nombre');
+                return
+            }
+
             this.participantList.push({ name: participant, wishList: [], id: v4() });
             this._participantInput.value = '';
             this.requestUpdate();
@@ -58,6 +63,7 @@ class LitInterchangeGifts extends LitElement {
 
     _deletingParticipant(id) {
         this.participantList = this.participantList.filter((participant) => participant.id !== id );
+        this.raffleList = [];
     }
 
     render() {
@@ -89,9 +95,9 @@ class LitInterchangeGifts extends LitElement {
                             ${
                                 this.raffleList.length > 0 ? this.raffleList.map((raffle) => html`
                                     <raffle-item .raffle=${ raffle }></raffle-item>
-                                `) : html`<p>Para realizar el sorteo necesitas al menos 3 participantes y que cada uno tenga al menos un elemento en su lista de deseos</p>`
+                                `) : ''
                             }
-                        ` : ''
+                        ` : html`<p>Para realizar el sorteo necesitas al menos 3 participantes y que cada uno tenga al menos un elemento en su lista de deseos</p>`
                     }
                 </div>
             </div>
